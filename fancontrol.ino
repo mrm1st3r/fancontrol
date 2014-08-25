@@ -1,12 +1,9 @@
 /**
  * fancontrol
  * version 0.2
- * (c) 2014 Lukas Taake
+ * (c) 2014 Lukas 'mrmst3r' Taake
+ * Published under MIT License
  *
- * This program uses two combined temperature and humidity sensors (DHT22)
- * to calculate the approximate absolute humidity inside and outside.
- * If the absolute humidity outside is lower than inside,
- * the FAN_PIN pin gets set to high.
  */
 
 #include <DHT.h>
@@ -67,6 +64,7 @@ void loop() {
 
 	int fanState = LOW;
 
+	// simple state machine to provide easy extension and modification
 	switch (state) {
 		case STATE_IDLE:
 			fanState = LOW;
@@ -83,6 +81,7 @@ void loop() {
 	}
 
 	digitalWrite(FAN_PIN, fanState);
+
 
 	Serial.print(humidIn);
 	Serial.print(" | ");

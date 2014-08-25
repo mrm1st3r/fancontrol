@@ -3,10 +3,10 @@
  * Version 0.1
  *
  * (c) 2014 Lukas 'mrm1st3r' Taake
- * Published under Creative Commons License Version 3
+ * Published under MIT License
  *
  * Based on formulas provided by Stefan Ochs
- * http://www.wetterochs.de/wetter/feuchte.html
+ * http://www.wetterochs.de/
  */
 
 /**
