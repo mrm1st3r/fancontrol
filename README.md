@@ -24,6 +24,7 @@ To operate properly the following hardware are being used:
 ## Connection
 The listed hardware should be connected to the Arduino as follows
 (alternatively ports can be changed in software):
+
 2. LCD DB7
 3. LCD DB6
 4. LCD DB5

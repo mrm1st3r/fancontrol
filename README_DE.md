@@ -17,7 +17,7 @@ Für die bestmögliche und vollständige Funktion wird folgende
 zusätzliche Hardware benötigt:
 * 1x Arduino Uno
 * 2x DHT22 Temperatur- und Luftfeuchtesensor
-* 1x Relee-Board um den/die Lüfter anzusteuern
+* 1x Relais-Board um den/die Lüfter anzusteuern
 * 1x ein beliebiges 16x2 LCD Display, das von der LiquidCrystal Bibliothek
 unterstützt wird (getestet mit JHD162a)
     * Peripherie (z.B. Potentiometer für Kontrastspannung)
@@ -25,13 +25,14 @@ unterstützt wird (getestet mit JHD162a)
 ## Verbindung
 Die aufgelistete Hardware sollte wie folgt an den Arduino angeschlossen werden
 (alternativ können die Ports im Programm geändert werden):
+
 2. LCD DB7
 3. LCD DB6
 4. LCD DB5
 5. LCD DB4
 6. DHT data (innen)
 7. DHT data (außen)
-8. Relee
+8. Relais
 11. LCD Enable
 12. LCD RS
 
