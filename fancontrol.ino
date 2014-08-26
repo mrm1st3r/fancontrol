@@ -1,6 +1,6 @@
 /**
  * fancontrol
- * version 0.2
+ * version 0.3.1
  * (c) 2014 Lukas 'mrmst3r' Taake
  * Published under MIT License
  *
@@ -15,7 +15,7 @@
 // timeout between readings
 #define SENSOR_TIMEOUT 2000
 
-// minimum temperature to operate
+// minimum outside temperature to activate fan(s)
 #define MIN_TEMP 10
 
 // input pin for inside sensor
@@ -29,6 +29,11 @@
 #define STATE_IDLE 0
 #define STATE_ACTIVE 1
 
+// all possible display modes
+#define LCD_HUMID_ABS 0
+#define LCD_HUMID_REL 1
+#define LCD_TEMP      2
+
 // initial state is idle
 int state = STATE_IDLE;
 
@@ -37,7 +42,7 @@ DHT dhtIn(SENSOR_INSIDE_PIN, SENSOR_TYPE);
 // outside
 DHT dhtOut(SENSOR_OUTSIDE_PIN, SENSOR_TYPE);
 
-// 2x16 display
+// lcd display
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
 void setup() {
@@ -91,44 +96,71 @@ void loop() {
 	 * Display output               *
 	 ********************************/
 	lcd.clear();
+	int lcdFlag = (millis() / 6000) % 3;
 
-	// inside humidity
+	float vIn = 0, vOut = 0;
+	char unit = ' ';
+	switch (lcdFlag) {
+		case LCD_HUMID_ABS:
+			vIn = humidIn;
+			vOut = humidOut;
+			// full unit would be g/m³ but is to long for the display
+			unit = 'g';
+			break;
+		case LCD_HUMID_REL:
+			vIn = hIn;
+			vOut = hOut;
+			unit = '%';
+			break;
+		case LCD_TEMP:
+			vIn = tIn;
+			vOut = tOut;
+			unit = 'C';
+			break;
+	}
+
+	// inside value
 	lcd.setCursor(0, 0);
-	lcd.print("in: ");
+	lcd.print("in:  ");
 	// correct number alignment
-	if (humidIn < 10) {
+	if (vIn < 10) {
 		lcd.print(" ");
 	}
-	lcd.print(humidIn);
+	lcd.print(vIn);
+	lcd.write(unit);
 	
-	// outside humidity
+	// outside value
 	lcd.setCursor(0, 1);
-	lcd.print("out:");
+	lcd.print("out: ");
 	// correct number alignment
-	if (humidOut < 10) {
+	if (vOut < 10) {
 		lcd.print(" ");
 	}
-	lcd.print(humidOut);
+	lcd.print(vOut);
+	lcd.write(unit);
 
-	// active state
+	// current state
 	if (state == STATE_ACTIVE) {
-		lcd.setCursor(10, 0);
-		lcd.print("active");
+		lcd.setCursor(13, 0);
+		lcd.print("act");
 	}
-	// outside lower than min temperature
+	// outside temperature lower than minimum
 	if (tOut < MIN_TEMP) {
 		lcd.setCursor(12, 1);
 		lcd.print("cold");
 	}
 
-	// serial data output
+	/***************************
+	 * Serial Output           *
+	 ***************************/
+
 	Serial.print(humidIn);
 	Serial.print(" | ");
 	Serial.print(humidOut);
 	Serial.print(" | ");
 	Serial.println(state);
 
-	// sensors can only be read every 2 seconds
+	// wait until sensors become ready
 	delay(SENSOR_TIMEOUT);
 }
 
