@@ -3,27 +3,12 @@
  * version 0.3.1
  * (c) 2014 Lukas 'mrmst3r' Taake
  * Published under MIT License
- *
  */
 
 #include <DHT.h>
 #include <LiquidCrystal.h>
 #include "humidity.h"
-
-// used sensor type
-#define SENSOR_TYPE DHT22
-// timeout between readings
-#define SENSOR_TIMEOUT 2000
-
-// minimum outside temperature to activate fan(s)
-#define MIN_TEMP 10
-
-// input pin for inside sensor
-#define SENSOR_INSIDE_PIN 6
-// input pin for outside sensor
-#define SENSOR_OUTSIDE_PIN 7
-// output pin for fan
-#define FAN_PIN 8
+#include "config.h"
 
 // all possible states
 #define STATE_IDLE 0
@@ -39,22 +24,37 @@ int state = STATE_IDLE;
 
 // inside sensor
 DHT dhtIn(SENSOR_INSIDE_PIN, SENSOR_TYPE);
-// outside
+// outside sensor
 DHT dhtOut(SENSOR_OUTSIDE_PIN, SENSOR_TYPE);
 
+#ifdef USE_DISPLAY
 // lcd display
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+#endif
+
+void display();
+void serial();
+
+float humidIn, humidOut;
 
 void setup() {
-	Serial.begin(9600);
+	// initialize sensors
 	dhtIn.begin();
 	dhtOut.begin();
-	lcd.begin(16, 2);
+	// initialize fan output
 	pinMode(FAN_PIN, OUTPUT);
 
-	// Header for serial data	
+#ifdef USE_DISPLAY
+	// initialize display
+	lcd.begin(16, 2);
+#endif
+
+#ifdef USE_SERIAL
+	// initialize serial 
+	Serial.begin(9600);
 	Serial.println("Humidity based fan control");
 	Serial.println("Inside | Outside | State");
+#endif
 }
 
 void loop() {
@@ -67,13 +67,15 @@ void loop() {
 
 	// check for reading errors
 	if (isnan(tIn) || isnan(tOut) || isnan(hIn) || isnan(hOut)) {
+#ifdef USE_SERIAL
 		Serial.println("Error while reading sensors");
+#endif
 		return;
 	}
 
 	// calculate absolute humidity for inside and outside
-	float humidIn = absoluteHumidity(hIn, tIn);
-	float humidOut = absoluteHumidity(hOut, tOut);
+	humidIn = absoluteHumidity(hIn, tIn);
+	humidOut = absoluteHumidity(hOut, tOut);
 
 	// simple state machine to provide easy extension and modification
 	switch (state) {
@@ -91,11 +93,18 @@ void loop() {
 
 	// Relay module works inversed
 	digitalWrite(FAN_PIN, !state);
+	
+	display();
+	serial();
 
-	/********************************
-	 * Display output               *
-	 ********************************/
+	// wait until sensors become ready
+	delay(SENSOR_TIMEOUT);
+}
+
+void display() {
+#ifdef USE_DISPLAY
 	lcd.clear();
+	// rotate display every 6 seconds
 	int lcdFlag = (millis() / 6000) % 3;
 
 	float vIn = 0, vOut = 0;
@@ -108,13 +117,13 @@ void loop() {
 			unit = 'g';
 			break;
 		case LCD_HUMID_REL:
-			vIn = hIn;
-			vOut = hOut;
+			vIn = dhtIn.readHumidity();
+			vOut = dhtOut.readHumidity();
 			unit = '%';
 			break;
 		case LCD_TEMP:
-			vIn = tIn;
-			vOut = tOut;
+			vIn = dhtIn.readTemperature();
+			vOut = dhtOut.readTemperature();
 			unit = 'C';
 			break;
 	}
@@ -145,22 +154,20 @@ void loop() {
 		lcd.print("act");
 	}
 	// outside temperature lower than minimum
-	if (tOut < MIN_TEMP) {
+	if (dhtOut.readTemperature() < MIN_TEMP) {
 		lcd.setCursor(12, 1);
 		lcd.print("cold");
 	}
+#endif // USE_DISPLAY
+}
 
-	/***************************
-	 * Serial Output           *
-	 ***************************/
-
+void serial() {
+#ifdef USE_SERIAL
 	Serial.print(humidIn);
 	Serial.print(" | ");
 	Serial.print(humidOut);
 	Serial.print(" | ");
 	Serial.println(state);
-
-	// wait until sensors become ready
-	delay(SENSOR_TIMEOUT);
+#endif
 }
 

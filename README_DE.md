@@ -26,21 +26,25 @@ unterstützt wird (getestet mit JHD162a)
 Die aufgelistete Hardware sollte wie folgt an den Arduino angeschlossen werden
 (alternativ können die Ports im Programm geändert werden):
 
-2. LCD DB7
-3. LCD DB6
-4. LCD DB5
-5. LCD DB4
-6. DHT data (innen)
-7. DHT data (außen)
-8. Relais
-11. LCD Enable
-12. LCD RS
+2  => LCD DB7
+3  => LCD DB6
+4  => LCD DB5
+5  => LCD DB4
+6  => DHT data (innen)
+7  => DHT data (außen)
+8  => Relais
+11 => LCD Enable
+12 => LCD RS
 
 Zusätzliche Verbindungen für das Display (JHD162a):
 
-1. GND
-2. VCC 5V
-3. Kontrastspannung
-5. GND
-15. VCC 4.2V (Hintergrundbeleuchtung)
-16. GND (Hintergrundbeleuchtung)
+1  => GND
+2  => VCC 5V
+3  => Kontrastspannung
+5  => GND
+15 => VCC 4.2V (Hintergrundbeleuchtung)
+16 => GND (Hintergrundbeleuchtung)
+
+## Konfiguration
+Sie können die Funktionalität durch anpassen der config.h auf ihre Bedürfnisse
+anpassen.

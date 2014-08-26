@@ -25,21 +25,25 @@ To operate properly the following hardware are being used:
 The listed hardware should be connected to the Arduino as follows
 (alternatively ports can be changed in software):
 
-2. LCD DB7
-3. LCD DB6
-4. LCD DB5
-5. LCD DB4
-6. DHT data (inside)
-7. DHT data (outside)
-8. Relay
-11. LCD Enable
-12. LCD RS
+2  => LCD DB7
+3  => LCD DB6
+4  => LCD DB5
+5  => LCD DB4
+6  => DHT data (inside)
+7  => DHT data (outside)
+8  => Relay
+11 => LCD Enable
+12 => LCD RS
 
 Additional LCD connections (for JHD162a):
 
-1. GND
-2. VCC 5V
-3. Contrast Current
-5. GND
-15. VCC 4.2V (Backlight)
-16. GND (Backlight)
+1  => GND
+2  => VCC 5V
+3  => Contrast Current
+5  => GND
+15 => VCC 4.2V (Backlight)
+16 => GND (Backlight)
+
+## Configuration
+You may decide what functionality exact you want by modifying config.h.  
+
