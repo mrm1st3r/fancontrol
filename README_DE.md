@@ -7,9 +7,11 @@ innen und außen die absolute Luftfeuchtigkeit zu berechnen.
 Wenn die absolute Feuchtigkeit außen geringer ist, als innen und
 die äußere Temperature die Mindesttemperatur überschreitet,
 wird Lüfter eingeschaltet.
+
 ## Abhängigkeiten
 * DHT Sensoren: https://github.com/adafruit/DHT-sensor-library
 * Display: Für die Displayansteuerung wird die LiquidCrystal Bibliothek benutzt
+
 ## Hardware
 Für die bestmögliche und vollständige Funktion wird folgende
 zusätzliche Hardware benötigt:
@@ -19,6 +21,7 @@ zusätzliche Hardware benötigt:
 * 1x ein beliebiges 16x2 LCD Display, das von der LiquidCrystal Bibliothek
 unterstützt wird (getestet mit JHD162a)
     * Peripherie (z.B. Potentiometer für Kontrastspannung)
+
 ## Verbindung
 Die aufgelistete Hardware sollte wie folgt an den Arduino angeschlossen werden
 (alternativ können die Ports im Programm geändert werden):
@@ -33,6 +36,7 @@ Die aufgelistete Hardware sollte wie folgt an den Arduino angeschlossen werden
 12. LCD RS
 
 Zusätzliche Verbindungen für das Display (JHD162a):
+
 1. GND
 2. VCC 5V
 3. Kontrastspannung
