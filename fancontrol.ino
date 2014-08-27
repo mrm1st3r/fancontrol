@@ -1,6 +1,6 @@
 /**
  * fancontrol
- * version 0.4.0
+ * version 0.4.1
  * (c) 2014 Lukas 'mrmst3r' Taake
  * Published under MIT License
  */
@@ -45,7 +45,9 @@ void display();
 void serial();
 void countTime();
 
+// absolute humidity values
 float humidIn, humidOut;
+
 // fan active time since last reset
 unsigned long actTime = 0;
 // fan active time resetted all 24 hours
@@ -63,19 +65,22 @@ void setup() {
 	pinMode(FAN_PIN, OUTPUT);
 
 #ifdef USE_DISPLAY
-	// initialize display
+	// initialize display 2x16 display
 	lcd.begin(16, 2);
 #endif
 
 #ifdef USE_SERIAL
 	// initialize serial 
-	Serial.begin(9600);
+	Serial.begin(SERIAL_BAUD);
 	Serial.println("Humidity based fan control");
 	Serial.println("Inside | Outside | State");
 #endif
 }
 
 void loop() {
+	// wait until sensors become ready
+	delay(SENSOR_TIMEOUT);
+
 	// read temperatures
 	int tIn = dhtIn.readTemperature();
 	int tOut = dhtOut.readTemperature();
@@ -83,10 +88,26 @@ void loop() {
 	int hIn = dhtIn.readHumidity();
 	int hOut = dhtOut.readHumidity();
 
-	// check for reading errors
-	if (isnan(tIn) || isnan(tOut) || isnan(hIn) || isnan(hOut)) {
+	char* err = NULL;
+
+	// check for sensor failures
+	if ((isnan(tIn) || isnan(hIn)) || (tIn == 0 && hIn == 0)) {
+		err = "inside";
+	} else if ((isnan(tOut) || isnan(hOut)) || (tOut == 0 && hOut == 0)) {
+		err = "outside";
+	}
+
+	if (err != NULL) {
 #ifdef USE_SERIAL
-		Serial.println("Error while reading sensors");
+		Serial.print("Sensor fail: ");
+		Serial.println(err);
+#endif
+#ifdef USE_DISPLAY
+		lcd.clear();
+		lcd.setCursor(0, 0);
+		lcd.print("sensor fail");
+		lcd.setCursor(0, 1);
+		lcd.print(err);
 #endif
 		return;
 	}
@@ -115,9 +136,6 @@ void loop() {
 	countTime();
 	display();
 	serial();
-
-	// wait until sensors become ready
-	delay(SENSOR_TIMEOUT);
 }
 
 void display() {
