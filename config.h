@@ -3,13 +3,17 @@
  ************************************************/
 
 // minimum outside temperature to activate fan(s)
-#define MIN_TEMP 10
-// how much less humid it must be outside to operate
-#define HUMID_OFFSET 1
+#define MIN_TEMP 5
+// min. humidity difference to start fan
+#define START_DIFF 1
+// max. humidity difference to stop fan
+#define STOP_DIFF 0.5
 // enable display functionality
 #define USE_DISPLAY
 // enable serial logging
 #define USE_SERIAL
+// enable force-active switch
+#define ENABLE_SWITCH
 // baudrate for serial logging
 #define SERIAL_BAUD 9600
 
@@ -34,7 +38,8 @@
 #define SENSOR_OUTSIDE_PIN 7
 // output pin for fan
 #define FAN_PIN 8
-
+// input pin for switch
+#define SWITCH_PIN 9
 
 /************************************************
  * Display configuration                        *

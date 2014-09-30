@@ -65,7 +65,7 @@ void setup() {
 	pinMode(FAN_PIN, OUTPUT);
 
 #ifdef USE_DISPLAY
-	// initialize display 2x16 display
+	// initialize d 2x16 display
 	lcd.begin(16, 2);
 #endif
 
@@ -74,6 +74,10 @@ void setup() {
 	Serial.begin(SERIAL_BAUD);
 	Serial.println("Humidity based fan control");
 	Serial.println("Inside | Outside | State");
+#endif
+
+#ifdef ENABLE_SWITCH
+	pinMode(SWITCH_PIN, INPUT);
 #endif
 }
 
@@ -109,6 +113,7 @@ void loop() {
 		lcd.setCursor(0, 1);
 		lcd.print(err);
 #endif
+		state = STATE_IDLE;
 		return;
 	}
 
@@ -119,16 +124,24 @@ void loop() {
 	// simple state machine to provide easy extension and modification
 	switch (state) {
 		case STATE_IDLE:
-			if ((humidIn - humidOut) >= HUMID_OFFSET && tOut > MIN_TEMP) {
+			if ((humidIn - humidOut) >= START_DIFF && tOut > MIN_TEMP) {
 				state = STATE_ACTIVE;
 			}
 			break;
 		case STATE_ACTIVE:
-			if ((humidIn - humidOut) < HUMID_OFFSET || tOut <= MIN_TEMP) {
+			if ((humidIn - humidOut) <= STOP_DIFF || tOut <= MIN_TEMP) {
 				state = STATE_IDLE;
 			}
 			break;
 	}
+
+#ifdef ENABLE_SWITCH
+	// force active state if switch is on high
+	if (digitalRead(SWITCH_PIN) == HIGH) {
+		//state = STATE_ACTIVE;
+		Serial.print("Knopf AN");
+	}
+#endif
 
 	// Relay module works inversed
 	digitalWrite(FAN_PIN, !state);
@@ -159,7 +172,7 @@ void display() {
 	int lcdFlag = (millis() / 6000) % 6;
 
 	lcd.setCursor(0, 0);
-	long timeVal = 0;
+	long timeVal = -1;
 	if (lcdFlag == LCD_TIME) {
 		timeVal = actTime;
 		lcd.print("Active time");
@@ -171,7 +184,7 @@ void display() {
 		timeVal = time;
 	}
 	// print the time that the fan was active
-	if (timeVal != 0) {
+	if (timeVal != -1) {
 		lcd.setCursor(0, 1);
 		
 		// hours
