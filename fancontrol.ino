@@ -47,6 +47,8 @@ void countTime();
 
 // absolute humidity values
 float humidIn, humidOut;
+float relHumidIn, relHumidOut;
+float temperatureIn, temperatureOut;
 
 // fan active time since last reset
 unsigned long actTime = 0;
@@ -56,6 +58,8 @@ unsigned long actToday = 0;
 unsigned long time = 0;
 // seconds since last 24h reset
 unsigned long today = 0;
+
+unsigned int failedReads = 0;
 
 void setup() {
 	// initialize sensors
@@ -86,22 +90,33 @@ void loop() {
 	delay(SENSOR_TIMEOUT);
 
 	// read temperatures
-	int tIn = dhtIn.readTemperature();
-	int tOut = dhtOut.readTemperature();
+	float tIn = dhtIn.readTemperature();
+	float tOut = dhtOut.readTemperature();
 	// read relative humidity
-	int hIn = dhtIn.readHumidity();
-	int hOut = dhtOut.readHumidity();
+	float hIn = dhtIn.readHumidity();
+	float hOut = dhtOut.readHumidity();
 
 	char* err = NULL;
 
 	// check for sensor failures
 	if ((isnan(tIn) || isnan(hIn)) || (tIn == 0 && hIn == 0)) {
 		err = "inside";
+		failedReads++;
 	} else if ((isnan(tOut) || isnan(hOut)) || (tOut == 0 && hOut == 0)) {
 		err = "outside";
+		failedReads++;
+	} else {
+	  	// calculate absolute humidity for inside and outside
+		humidIn = absoluteHumidity(hIn, tIn);
+		humidOut = absoluteHumidity(hOut, tOut);
+		temperatureIn = tIn;
+		temperatureOut = tOut;
+		relHumidIn = hIn;
+		relHumidOut = hOut;
+		failedReads = 0;
 	}
 
-	if (err != NULL) {
+	if (err != NULL && failedReads > 4) {
 #ifdef USE_SERIAL
 		Serial.print("Sensor fail: ");
 		Serial.println(err);
@@ -117,19 +132,15 @@ void loop() {
 		return;
 	}
 
-	// calculate absolute humidity for inside and outside
-	humidIn = absoluteHumidity(hIn, tIn);
-	humidOut = absoluteHumidity(hOut, tOut);
-
 	// simple state machine to provide easy extension and modification
 	switch (state) {
 		case STATE_IDLE:
-			if ((humidIn - humidOut) >= START_DIFF && tOut > MIN_TEMP) {
+			if ((humidIn - humidOut) >= START_DIFF && temperatureOut > MIN_TEMP) {
 				state = STATE_ACTIVE;
 			}
 			break;
 		case STATE_ACTIVE:
-			if ((humidIn - humidOut) <= STOP_DIFF || tOut <= MIN_TEMP) {
+			if ((humidIn - humidOut) <= STOP_DIFF || temperatureOut <= MIN_TEMP) {
 				state = STATE_IDLE;
 			}
 			break;
@@ -144,7 +155,7 @@ void loop() {
 #endif
 
 	// Relay module works inversed
-	digitalWrite(FAN_PIN, !state);
+	digitalWrite(FAN_PIN, state);
 
 	countTime();
 	display();
@@ -163,7 +174,7 @@ void display() {
 		lcd.print("act");
 	}
 	// outside temperature lower than minimum
-	if (dhtOut.readTemperature() < MIN_TEMP) {
+	if (temperatureOut < MIN_TEMP) {
 		lcd.setCursor(12, 1);
 		lcd.print("cold");
 	}
@@ -222,13 +233,13 @@ void display() {
 			unit = 'g';
 			break;
 		case LCD_HUMID_REL:
-			vIn = dhtIn.readHumidity();
-			vOut = dhtOut.readHumidity();
+			vIn = relHumidIn;
+			vOut = relHumidOut;
 			unit = '%';
 			break;
 		case LCD_TEMP:
-			vIn = dhtIn.readTemperature();
-			vOut = dhtOut.readTemperature();
+			vIn = temperatureIn;
+			vOut = temperatureOut;
 			unit = 'C';
 			break;
 	}

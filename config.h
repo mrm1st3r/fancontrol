@@ -5,9 +5,9 @@
 // minimum outside temperature to activate fan(s)
 #define MIN_TEMP 5
 // min. humidity difference to start fan
-#define START_DIFF 1
+#define START_DIFF 0.6
 // max. humidity difference to stop fan
-#define STOP_DIFF 0.5
+#define STOP_DIFF 0.2
 // enable display functionality
 #define USE_DISPLAY
 // enable serial logging
@@ -25,7 +25,7 @@
 #define SENSOR_TYPE_INSIDE DHT22
 #define SENSOR_TYPE_OUTSIDE DHT22
 // timeout between readings
-#define SENSOR_TIMEOUT 2000
+#define SENSOR_TIMEOUT 3000
 
 
 /************************************************
